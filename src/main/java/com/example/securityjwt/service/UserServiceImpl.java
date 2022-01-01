@@ -68,6 +68,33 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     }
 
+    @Override
+    public AppUser registro(String firstName, String lastName, String username, String email) throws UserNotFoundException, UsernameExistsException, EmailExistsException, MessagingException {
+        validateNewUsernameAndEmail(StringUtils.EMPTY,username,email);
+        AppUser user=new AppUser();
+        user.setUserId(generateUserId());
+        String password=generatePassword();
+        String encodedPassword=encodePassword(password);
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setUsername(username);
+        user.setEmail(email);
+        user.setJoinDate(LocalDate.now());
+        user.setPassword(encodedPassword);
+        user.setActive(true);
+        user.setNotLocked(true);
+        //por defecto role es user
+        user.setRoles(ROLE_USER.name());
+        user.setAuthorities(ROLE_USER.getAuthorities());
+        user.setProfileImageUrl(getTemporaryProfileImageUrl(username));
+
+        //temporal, ya que el password se encripta
+        log.info("Contraseña de nuevo usuario: "+password);
+        emailService.sendNewPasswordEmail(firstName,password,email);
+
+        return userRepo.save(user);
+    }
+
     private void validateLoginAttempt(AppUser user)  {
         //TODO: Implementar desbloquear al user despues de un tiempo o a pedido del user
         if (user.isNotLocked()){
@@ -172,38 +199,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return user;
     }
 
-    @Override
-    public AppUser registro(String firstName, String lastName, String username, String email) throws UserNotFoundException, UsernameExistsException, EmailExistsException, MessagingException {
-        validateNewUsernameAndEmail(StringUtils.EMPTY,username,email);
-        AppUser user=new AppUser();
-        user.setUserId(generateUserId());
-        String password=generatePassword();
-        String encodedPassword=encodePassword(password);
 
-        user.setFirstName(firstName);
-        user.setLastName(lastName);
-        user.setUsername(username);
-        user.setEmail(email);
-        user.setJoinDate(LocalDate.now());
-        user.setPassword(encodedPassword);
-        user.setActive(true);
-        user.setNotLocked(true);
-        //por defecto role es user
-        user.setRoles(ROLE_USER.name());
-        user.setAuthorities(ROLE_USER.getAuthorities());
-        user.setProfileImageUrl(getTemporaryProfileImageUrl(username));
-
-        //temporal, ya que el password se encripta
-        log.info("Contraseña de nuevo usuario:"+password);
-        emailService.sendNewPasswordEmail(firstName,password,email);
-
-        return userRepo.save(user);
-    }
-
-    private String getTemporaryProfileImageUrl(String username) {
-        //TODO: Consumir una api desde el userResource para obtener imagenes ui-avatar
-        return ServletUriComponentsBuilder.fromCurrentContextPath().path(DEFAULT_USER_IMAGE_PATH+username).toUriString();
-    }
 
     private String generateUserId() {
         return RandomStringUtils.randomNumeric(10);
@@ -276,6 +272,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     private String setProfileImageUrl(String username) {
         //ubicacion real de la imagen
         return ServletUriComponentsBuilder.fromCurrentContextPath().path(DEFAULT_USER_IMAGE_PATH+username+FORWARD_SLASH+username+DOT+JPG_EXTENSION).toUriString();
+    }
+
+    private String getTemporaryProfileImageUrl(String username) {
+        //Consumir una api desde el userResource para obtener imagenes ui-avatar
+        return ServletUriComponentsBuilder.fromCurrentContextPath().path(DEFAULT_USER_IMAGE_PATH+username).toUriString();
     }
 
     //si pasamos user, retorna ROLE_USER

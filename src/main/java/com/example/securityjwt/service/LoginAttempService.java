@@ -14,7 +14,7 @@ import static java.util.concurrent.TimeUnit.MINUTES;
 @Service
 public class LoginAttempService {
 
-    public static final int  MAX_ATTEMPTS=1;
+    public static final int  MAX_ATTEMPTS=5;
     public static final int  ATTEMPT_INCREMENT=1;
 
     //key user : value attempt

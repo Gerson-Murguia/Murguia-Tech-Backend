@@ -4,7 +4,6 @@ import com.example.securityjwt.exception.domain.*;
 import com.example.securityjwt.model.AppUser;
 import com.example.securityjwt.model.AppUserDetails;
 import com.example.securityjwt.model.HttpResponse;
-import com.example.securityjwt.service.LoginAttempService;
 import com.example.securityjwt.service.UserService;
 import com.example.securityjwt.utility.JWTTokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +22,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Date;
 import java.util.List;
 
 import static com.example.securityjwt.constant.FileConstant.*;
@@ -39,7 +37,6 @@ public class UserResource extends ExceptionHandling {
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
     private final JWTTokenProvider jwtTokenProvider;
-    private final LoginAttempService loginAttempService;
 
     @PostMapping("/register")
     public ResponseEntity<AppUser> register(@RequestBody AppUser user) throws UserNotFoundException, UsernameExistsException, EmailExistsException, MessagingException {
@@ -84,13 +81,13 @@ public class UserResource extends ExceptionHandling {
                                            @RequestParam("lastName") String lastName,
                                            @RequestParam("username") String username,
                                            @RequestParam("email") String email,
-                                           @RequestParam("role") String role,
-                                           @RequestParam("isActive") boolean isActive,
-                                           @RequestParam("isNonLocked") boolean isNonLocked,
+                                           @RequestParam("roles") String role,
+                                           @RequestParam("isActive") String isActive,
+                                           @RequestParam("isNonLocked") String isNonLocked,
                                            @RequestParam(value="profileImage",required = false) MultipartFile profileImage)
             throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException {
         //EXPLAIN: la imagen de perfil es opcional
-        AppUser updatedUser=userService.updateUser(currentUsername,firstName,lastName,username,email,role,isNonLocked,isActive,profileImage);
+        AppUser updatedUser=userService.updateUser(currentUsername,firstName,lastName,username,email,role,Boolean.parseBoolean(isNonLocked),Boolean.parseBoolean(isActive),profileImage);
 
         return new ResponseEntity<>(updatedUser,HttpStatus.OK);
     }
@@ -102,7 +99,7 @@ public class UserResource extends ExceptionHandling {
         return new ResponseEntity<>(user,HttpStatus.OK);
     }
 
-    @GetMapping("/find/")
+    @GetMapping("/list")
     public ResponseEntity<List<AppUser>> getAllUser(){
         List<AppUser> users=userService.getUsers();
         return new ResponseEntity<>(users, HttpStatus.OK);
@@ -142,7 +139,7 @@ public class UserResource extends ExceptionHandling {
     }
 
     //seleccionar la imagen ya creada cuando no pasan imagenes
-    @GetMapping(value = "/image/profile({username}",produces = IMAGE_JPEG_VALUE)
+    @GetMapping(value = "/image/profile/{username}",produces = IMAGE_JPEG_VALUE)
     public byte[] getTempProfileImage(@PathVariable("username") String username) throws IOException {
         URL url=new URL(TEMP_PROFILE_IMAGE_BASE_URL+username+"?set=set4");
         //leer los datos del url
@@ -174,7 +171,7 @@ public class UserResource extends ExceptionHandling {
     }
 
     private ResponseEntity<HttpResponse> response(HttpStatus status, String mensaje) {
-        HttpResponse httpResponse=new HttpResponse(status.value(),status,status.getReasonPhrase(),mensaje,new Date());
+        HttpResponse httpResponse=new HttpResponse(status.value(),status,status.getReasonPhrase(),mensaje);
 
         return new ResponseEntity<>(httpResponse,null,status);
     }
