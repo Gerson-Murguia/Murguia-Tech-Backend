@@ -49,7 +49,7 @@ public class EmailService {
         message.setSubject(EMAIL_SUBJECT);
         message.setSentDate(new Date());
         message.saveChanges();
-        message.setText("Hello "+firstName+", \n\n La nueva contraseña es: "+password+"\n\n Equipo de Soporte - Murguia Tech");
+        message.setText("Hola "+firstName+", \n\n La nueva contraseña es: "+password+"\n\n Equipo de Soporte - Murguia Tech");
         return message;
     }
 }
