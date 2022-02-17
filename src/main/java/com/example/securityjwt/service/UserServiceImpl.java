@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -178,8 +179,10 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public void deleteUser(String username) {
+    public void deleteUser(String username) throws IOException {
         AppUser user =userRepo.findByUsername(username);
+        Path userFolder=Paths.get(USER_FOLDER+user.getUsername()).toAbsolutePath().normalize();
+        FileUtils.deleteDirectory(userFolder.toFile());
         userRepo.deleteById(user.getId());
     }
 
