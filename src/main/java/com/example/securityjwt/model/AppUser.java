@@ -1,5 +1,7 @@
 package com.example.securityjwt.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,16 +18,17 @@ public class AppUser implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(nullable = false,updatable = false)
+    @JsonProperty(access=JsonProperty.Access.WRITE_ONLY)
     private Long id;
     private String userId;
     private String firstName;
     private String lastName;
     private String username;
+    @JsonProperty(access=JsonProperty.Access.WRITE_ONLY)
     private String password;
     private String email;
     //TODO: guardar imagenes en AWS
     private String profileImageUrl;
-    //TODO: intentar con localdate sino cambiar a util.date
     private LocalDate lastLoginDate;
     private LocalDate LastLoginDateDisplay;
     private LocalDate joinDate;
