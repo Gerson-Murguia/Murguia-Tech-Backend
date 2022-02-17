@@ -69,6 +69,11 @@ public class ExceptionHandling implements  ErrorController{
         return createHttpResponse(HttpStatus.BAD_REQUEST, NOT_ENOUGH_PERMISSION);
     }
 
+    @ExceptionHandler(NotAnImageException.class)
+    private ResponseEntity<HttpResponse> notAnImageException(NotAnImageException exception){
+        return createHttpResponse(HttpStatus.BAD_REQUEST, exception.getMessage());
+    }
+
     @ExceptionHandler(TokenExpiredException.class)
     private ResponseEntity<HttpResponse> tokenExpiredException(TokenExpiredException exception){
         return createHttpResponse(HttpStatus.UNAUTHORIZED,exception.getMessage());

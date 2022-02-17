@@ -70,7 +70,7 @@ public class UserResource extends ExceptionHandling {
                                            @RequestParam("isActive") boolean isActive,
                                            @RequestParam("isNotLocked") boolean isNonLocked,
                                            @RequestParam(value="profileImage",required = false) MultipartFile profileImage)
-                                            throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException {
+            throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException, NotAnImageException {
         //EXPLAIN: la imagen de perfil es opcional
         AppUser usuarioNuevo=userService.addNuevoUser(firstName,lastName,username,email,role,isNonLocked,isActive,profileImage);
 
@@ -87,7 +87,7 @@ public class UserResource extends ExceptionHandling {
                                            @RequestParam("isActive") String isActive,
                                            @RequestParam("isNotLocked") String isNonLocked,
                                            @RequestParam(value="profileImage",required = false) MultipartFile profileImage)
-            throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException {
+            throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException, NotAnImageException {
         //EXPLAIN: la imagen de perfil es opcional
         AppUser updatedUser=userService.updateUser(currentUsername,firstName,lastName,username,email,role,Boolean.parseBoolean(isNonLocked),Boolean.parseBoolean(isActive),profileImage);
 
@@ -114,7 +114,7 @@ public class UserResource extends ExceptionHandling {
 
     @DeleteMapping("/delete/{username}")
     @PreAuthorize("hasAnyAuthority('user:delete')")
-    public ResponseEntity<HttpResponse> delete(@PathVariable String username)  {
+    public ResponseEntity<HttpResponse> delete(@PathVariable String username) throws IOException {
         //body,headers,status
         userService.deleteUser(username);
         return response(HttpStatus.OK, USUARIO_ELIMINADO);
@@ -124,7 +124,7 @@ public class UserResource extends ExceptionHandling {
     public ResponseEntity<AppUser> updateProfileImage(
                                               @RequestParam("username") String username,
                                               @RequestParam(value="profileImage") MultipartFile profileImage)
-            throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException {
+            throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException, NotAnImageException {
         //EXPLAIN: la imagen de perfil es opcional
         AppUser user=userService.updateProfileImage(username,profileImage);
 
