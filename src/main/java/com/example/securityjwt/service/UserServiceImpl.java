@@ -2,10 +2,7 @@ package com.example.securityjwt.service;
 
 import com.example.securityjwt.configuration.UserPasswordEncoder;
 import com.example.securityjwt.enumeration.Role;
-import com.example.securityjwt.exception.domain.EmailExistsException;
-import com.example.securityjwt.exception.domain.EmailNotFoundException;
-import com.example.securityjwt.exception.domain.UserNotFoundException;
-import com.example.securityjwt.exception.domain.UsernameExistsException;
+import com.example.securityjwt.exception.domain.*;
 import com.example.securityjwt.model.AppUser;
 import com.example.securityjwt.model.AppUserDetails;
 import com.example.securityjwt.repository.UserRepository;
@@ -29,11 +26,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import static com.example.securityjwt.constant.FileConstant.*;
 import static com.example.securityjwt.constant.UserImplConstant.*;
 import static com.example.securityjwt.enumeration.Role.ROLE_USER;
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
+import static org.springframework.http.MediaType.*;
 
 
 @Slf4j
@@ -131,7 +130,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     //todo: cuando un nuevo usuario se añade si no tiene foto, se agrega foto temporal, sino la original como ruta
     @Override
-    public AppUser addNuevoUser(String firstName, String lastName, String username, String email, String role, boolean isNonLocked, boolean isActive, MultipartFile profileImage) throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException {
+    public AppUser addNuevoUser(String firstName, String lastName, String username, String email, String role, boolean isNonLocked, boolean isActive, MultipartFile profileImage) throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException, NotAnImageException {
         validateNewUsernameAndEmail(StringUtils.EMPTY,username,email);
         AppUser user=new AppUser();
         String password=generatePassword();
@@ -156,7 +155,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
 
     @Override
-    public AppUser updateUser(String currentUsername, String nuevoFirstName, String nuevoLastName, String nuevoUsername, String nuevoEmail, String role, boolean isNonLocked, boolean isActive, MultipartFile profileImage) throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException {
+    public AppUser updateUser(String currentUsername, String nuevoFirstName, String nuevoLastName, String nuevoUsername, String nuevoEmail, String role, boolean isNonLocked, boolean isActive, MultipartFile profileImage) throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException, NotAnImageException {
         AppUser currentUser = validateNewUsernameAndEmail(currentUsername,nuevoUsername,nuevoEmail);
         //TODO:asegurarse user not null
         if (currentUser==null) throw new UserNotFoundException("Usuario no encontrado");
@@ -200,9 +199,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public AppUser updateProfileImage(String username, MultipartFile profileImage) throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException {
+    public AppUser updateProfileImage(String username, MultipartFile profileImage) throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException, NotAnImageException {
         AppUser user=validateNewUsernameAndEmail(username,null,null);
-        log.info("Usuario a cambiar imagen: "+user.getUsername());
         saveProfileImage(user,profileImage);
         return user;
     }
@@ -259,8 +257,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             return null;
         }
     }
-    private void saveProfileImage(AppUser user, MultipartFile profileImage) throws IOException {
+    private void saveProfileImage(AppUser user, MultipartFile profileImage) throws IOException, NotAnImageException {
         if (profileImage!=null){
+            //si la imagen no es de ninguno de estos contentType
+            if (!Arrays.asList(IMAGE_JPEG_VALUE,IMAGE_PNG_VALUE,IMAGE_GIF_VALUE).contains(profileImage.getContentType())){
+                throw new NotAnImageException(profileImage.getOriginalFilename()+" no es una imagen. Por favor, suba una imagen");
+            }
             // user/home/murguiatech/gerson
             Path userFolder= Paths.get(USER_FOLDER+user.getUsername()).toAbsolutePath().normalize();
             if (!Files.exists(userFolder)){
