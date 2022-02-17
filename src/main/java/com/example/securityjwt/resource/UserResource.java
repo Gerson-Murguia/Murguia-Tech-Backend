@@ -28,9 +28,11 @@ import static com.example.securityjwt.constant.FileConstant.*;
 import static com.example.securityjwt.constant.SecurityConstant.JWT_TOKEN_HEADER;
 import static org.springframework.http.MediaType.IMAGE_JPEG_VALUE;
 
+
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(path = {"/","/user"})
+@CrossOrigin("http://localhost:4200")
 public class UserResource extends ExceptionHandling {
 
     public static final String USUARIO_ELIMINADO = "Usuario eliminado";
@@ -61,12 +63,12 @@ public class UserResource extends ExceptionHandling {
     //add dentro de la aplicacion
     @PostMapping("/add")
     public ResponseEntity<AppUser> addUser(@RequestParam("firstName") String firstName,
-                                           @RequestParam("firstName") String lastName,
-                                           @RequestParam("firstName") String username,
-                                           @RequestParam("firstName") String email,
-                                           @RequestParam("firstName") String role,
-                                           @RequestParam("firstName") boolean isActive,
-                                           @RequestParam("firstName") boolean isNonLocked,
+                                           @RequestParam("lastName") String lastName,
+                                           @RequestParam("username") String username,
+                                           @RequestParam("email") String email,
+                                           @RequestParam("role") String role,
+                                           @RequestParam("isActive") boolean isActive,
+                                           @RequestParam("isNotLocked") boolean isNonLocked,
                                            @RequestParam(value="profileImage",required = false) MultipartFile profileImage)
                                             throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException {
         //EXPLAIN: la imagen de perfil es opcional
@@ -76,14 +78,14 @@ public class UserResource extends ExceptionHandling {
     }
 
     @PostMapping("/update")
-    public ResponseEntity<AppUser> updateUser(@RequestParam("currentUser") String currentUsername,
+    public ResponseEntity<AppUser> updateUser(@RequestParam("currentUsername") String currentUsername,
                                             @RequestParam("firstName") String firstName,
                                            @RequestParam("lastName") String lastName,
                                            @RequestParam("username") String username,
                                            @RequestParam("email") String email,
-                                           @RequestParam("roles") String role,
+                                           @RequestParam("role") String role,
                                            @RequestParam("isActive") String isActive,
-                                           @RequestParam("isNonLocked") String isNonLocked,
+                                           @RequestParam("isNotLocked") String isNonLocked,
                                            @RequestParam(value="profileImage",required = false) MultipartFile profileImage)
             throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException {
         //EXPLAIN: la imagen de perfil es opcional
@@ -115,7 +117,7 @@ public class UserResource extends ExceptionHandling {
     public ResponseEntity<HttpResponse> delete(@PathVariable Long id)  {
         //body,headers,status
         userService.deleteUser(id);
-        return response(HttpStatus.NO_CONTENT, USUARIO_ELIMINADO);
+        return response(HttpStatus.OK, USUARIO_ELIMINADO);
     }
 
     @PostMapping("/updateProfileImage")
@@ -130,7 +132,7 @@ public class UserResource extends ExceptionHandling {
     }
 
     //seleccionar la imagen ya creada desde el sistema
-    @GetMapping(value = "/image/{username}/{fileName}",produces = IMAGE_JPEG_VALUE)
+    @GetMapping(value = "/image/profile/{username}/{fileName}",produces = IMAGE_JPEG_VALUE)
     public byte[] getProfileImage(@PathVariable("username") String username,
                                   @PathVariable("fileName") String fileName) throws IOException {
 
@@ -161,6 +163,7 @@ public class UserResource extends ExceptionHandling {
 
     private HttpHeaders getJwtHeaders(AppUserDetails userDetails) {
         HttpHeaders headers=new HttpHeaders();
+        //el header no se muestra al frontend por defecto
         headers.add(JWT_TOKEN_HEADER,jwtTokenProvider.generateJWTToken(userDetails));
         return headers;
     }
