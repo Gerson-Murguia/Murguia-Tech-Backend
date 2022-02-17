@@ -69,7 +69,7 @@ public class JWTTokenProvider {
     private JWTVerifier getJWTVerifier() {
         JWTVerifier verificador;
         try {
-            Algorithm algorithm=Algorithm.HMAC512(secret);
+            Algorithm algorithm=Algorithm.HMAC256(secret);
             verificador=JWT.require(algorithm).withIssuer(MURGUIA_TECH).build();
 
         }catch (JWTVerificationException ex){
