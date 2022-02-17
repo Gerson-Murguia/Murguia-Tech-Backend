@@ -128,6 +128,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return userRepo.findByEmail(email);
     }
 
+    //todo: cuando un nuevo usuario se añade si no tiene foto, se agrega foto temporal, sino la original como ruta
     @Override
     public AppUser addNuevoUser(String firstName, String lastName, String username, String email, String role, boolean isNonLocked, boolean isActive, MultipartFile profileImage) throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException {
         validateNewUsernameAndEmail(StringUtils.EMPTY,username,email);
@@ -144,6 +145,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         user.setActive(isActive);
         user.setPassword(encodePassword(password));
         user.setAuthorities(getRoleEnumName(role).getAuthorities());
+        //image temporal
         user.setProfileImageUrl(getTemporaryProfileImageUrl(username));
         userRepo.save(user);
         saveProfileImage(user,profileImage);
@@ -170,6 +172,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         currentUser.setAuthorities(getRoleEnumName(role).getAuthorities());
         currentUser.setProfileImageUrl(getTemporaryProfileImageUrl(nuevoUsername));
         userRepo.save(currentUser);
+        //si el user tiene un profile image
         saveProfileImage(currentUser,profileImage);
         return currentUser;
     }
@@ -195,6 +198,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public AppUser updateProfileImage(String username, MultipartFile profileImage) throws UserNotFoundException, UsernameExistsException, EmailExistsException, IOException {
         AppUser user=validateNewUsernameAndEmail(username,null,null);
+        log.info("Usuario a cambiar imagen: "+user.getUsername());
         saveProfileImage(user,profileImage);
         return user;
     }
@@ -221,14 +225,14 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     //el username actual es por si el user esta logeado
 
         //no deberia encontrar el usuario si se esta registrando
-        AppUser userByNewUsername=findUserByUsername(usernameNuevo);
-        AppUser userByEmail=findUserByEmail(emailNuevo);
+        AppUser userByNewUsername=findUserByUsername(usernameNuevo); //es null
+        AppUser userByEmail=findUserByEmail(emailNuevo); //es null
 
 
         if(StringUtils.isNotBlank(usernameActual)){
             //buscamos el user por username para ver si ya esta registrado
             AppUser currentUser =findUserByUsername(usernameActual);
-
+            log.info("usuario actual encontrado: "+ currentUser.getUsername());
             if(currentUser==null){
                 throw  new UserNotFoundException("No se encontro el usuario por su username: "+ usernameActual);
             }
@@ -240,7 +244,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             if (userByEmail !=null && !userByNewUsername.getUserId().equals(userByEmail.getUserId())){
                 throw new EmailExistsException(EMAIL_YA_EXISTE);
             }
-            return userByNewUsername;
+            return currentUser;
         }else{
             if (userByNewUsername!=null){
                 throw new UsernameExistsException(USERNAME_YA_EXISTE);
@@ -257,7 +261,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             Path userFolder= Paths.get(USER_FOLDER+user.getUsername()).toAbsolutePath().normalize();
             if (!Files.exists(userFolder)){
                 Files.createDirectories(userFolder);
-                log.info("Directorio creado");
+                log.info("Directorio creado:"+userFolder.toString());
             }
             //si existe la imagen, la borra
             Files.deleteIfExists(Paths.get(userFolder+user.getUsername()+DOT+JPG_EXTENSION));
