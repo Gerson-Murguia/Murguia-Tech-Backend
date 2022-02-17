@@ -38,7 +38,7 @@ public class ExceptionHandling implements  ErrorController{
 
     //envia nuestro response personalizado em el responseentity
     private ResponseEntity<HttpResponse> createHttpResponse(HttpStatus httpStatus, String message){
-        HttpResponse httpResponse=new HttpResponse(httpStatus.value(),httpStatus,httpStatus.getReasonPhrase().toUpperCase(),message.toUpperCase(),new Date());
+        HttpResponse httpResponse=new HttpResponse(httpStatus.value(),httpStatus,httpStatus.getReasonPhrase(),message,new Date());
 
         return new ResponseEntity<HttpResponse>(httpResponse,httpStatus);
     }
