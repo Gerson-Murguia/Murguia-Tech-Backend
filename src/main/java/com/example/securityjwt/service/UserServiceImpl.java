@@ -148,6 +148,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         //image temporal
         user.setProfileImageUrl(getTemporaryProfileImageUrl(username));
         userRepo.save(user);
+        log.info(password);
         saveProfileImage(user,profileImage);
         return user;
     }
