@@ -3,6 +3,7 @@ package com.example.securityjwt.constant;
 public class SecurityConstant {
     //CONSTANTES DE SEGURIDAD
     public static final long EXPIRATION_TIME=432_000_000; //5 dias en milisegundos
+    public static final String FRONTEND_URL="https://murguiatech.netlify.app"; //no necesita verificacion el token
     public static final String TOKEN_PREFIX="Bearer "; //no necesita verificacion el token
     public static final String JWT_TOKEN_HEADER="Jwt-Token";//estara en el header del request
     public static final String TOKEN_CANNOT_BE_VERIFIED="El token no se puede verificar";//si no se puede verificar el token
