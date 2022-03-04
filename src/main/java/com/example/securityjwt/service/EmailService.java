@@ -3,6 +3,8 @@ package com.example.securityjwt.service;
 import com.sun.mail.smtp.SMTPTransport;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.mail.Message;
@@ -19,11 +21,16 @@ import static com.example.securityjwt.constant.EmailConstant.*;
 @Service
 public class EmailService {
 
+    @Value("${email.username}")
+    public String byUsername;
+    @Value("${email.password}")
+    public String byPassword;
     //TODO: Mandarlo asincrono
+    @Async
     public void sendNewPasswordEmail(String firstName, String password, String email) throws MessagingException {
         Message message = createEmail(firstName,password,email);
         SMTPTransport smtpTransport= (SMTPTransport) getEmailSession().getTransport(SIMPLE_MAIL_TRANSFER_PROTOCOL);
-        smtpTransport.connect(GMAIL_SMTP_SERVER,USERNAME,PASSWORD);
+        smtpTransport.connect(GMAIL_SMTP_SERVER,byUsername,byPassword);
         smtpTransport.sendMessage(message,message.getAllRecipients());
         smtpTransport.close();
     }

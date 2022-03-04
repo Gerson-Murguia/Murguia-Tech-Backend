@@ -1,9 +1,9 @@
 package com.example.securityjwt.constant;
 
+import org.springframework.beans.factory.annotation.Value;
+
 public class EmailConstant {
     public static final String SIMPLE_MAIL_TRANSFER_PROTOCOL = "smtps";
-    public static final String USERNAME="aldmurguia1@gmail.com";
-    public static final String PASSWORD="C1a2r3a4";
     public static final String FROM_EMAIL="aldmurguia1@gmail.com";
     public static final String CC_EMAIL="";
     public static final String EMAIL_SUBJECT="Tech Murguia - Nueva Contraseña"; ;
