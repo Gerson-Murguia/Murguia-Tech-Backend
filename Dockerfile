@@ -10,7 +10,7 @@ COPY pom.xml .
 COPY src ./src
 
 # Compila la aplicación y genera el archivo JAR
-RUN mvn clean package
+RUN mvn clean package --mount=type=secret,id=_env,dst=/etc/secrets/.env
 
 
 # Usa una imagen base con Java 8
