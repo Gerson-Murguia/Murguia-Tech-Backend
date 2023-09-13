@@ -1,18 +1,16 @@
 # syntax = docker/dockerfile:1.2
 
-# Etapa 1: Construcción
 FROM maven:3.8.4-openjdk-8 AS builder
 
-# Establece el directorio de trabajo en /app
 WORKDIR /app
 
-# Copia el archivo pom.xml y el archivo de configuración (si es necesario)
 COPY pom.xml .
-# Copia toddo el código fuente de la aplicación
+
 COPY src ./src
 
-# Compila la aplicación y genera el archivo JAR
-RUN mvn clean package --mount=type=secret,id=_env,target=/etc/secrets/.env
+RUN --mount=type=secret,id=_env,target=/etc/secrets/.env
+
+RUN mvn clean package
 
 
 # Usa una imagen base con Java 8
