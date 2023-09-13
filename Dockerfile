@@ -8,9 +8,8 @@ COPY pom.xml .
 
 COPY src ./src
 
-RUN --mount=type=secret,id=_env,target=/etc/secrets/.env
+RUN --mount=type=secret,id=_env,target=/etc/secrets/.env mvn -e -B clean package -Dmaven.test.skip=true
 
-RUN mvn clean package
 
 
 # Usa una imagen base con Java 8
