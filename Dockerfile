@@ -1,3 +1,5 @@
+# syntax = docker/dockerfile:1.2
+
 # Etapa 1: Construcción
 FROM maven:3.8.4-openjdk-8 AS builder
 
